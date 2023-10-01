@@ -1,6 +1,7 @@
 //External includes
 #include "SDL.h"
 #include "SDL_surface.h"
+#include <iostream>
 
 //Project includes
 #include "Renderer.h"
@@ -27,15 +28,31 @@ void Renderer::Render(Scene* pScene) const
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 
+	// For each pixel
 	for (int px{}; px < m_Width; ++px)
 	{
 		for (int py{}; py < m_Height; ++py)
 		{
-			float gradient = px / static_cast<float>(m_Width);
-			gradient += py / static_cast<float>(m_Width);
-			gradient /= 2.0f;
+			// CREATE RAY
+			
+			// Calculate Ray direction
+			float pcx = px + 0.5f;
+			float pcy = py + 0.5f;
 
-			ColorRGB finalColor{ gradient, gradient, gradient };
+			// cx = (2 (px+0.5) / width - 1) (width/height)
+			// cy = 1 - 2 (py + 0.5) / height
+			float cx = 2 * pcx / m_Width - 1;
+			cx *= (m_Width / m_Height);
+			float cy = 1 - (2 * pcy) / m_Height;
+
+			// r = cx right + cy up + look
+			// Normalise the result
+			Vector3 rayDirection = camera.forward + cx * camera.right + cy * camera.up;
+			rayDirection.Normalize();
+
+			Ray hitRay{ {0,0,0}, rayDirection };
+
+			ColorRGB finalColor{ rayDirection.x, rayDirection.y, rayDirection.z };
 
 			//Update Color in Buffer
 			finalColor.MaxToOne();
@@ -55,4 +72,9 @@ void Renderer::Render(Scene* pScene) const
 bool Renderer::SaveBufferToImage() const
 {
 	return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
+}
+
+Vector3 Renderer::CalculateRayDirection(int x, int y)
+{
+	return Vector3();
 }

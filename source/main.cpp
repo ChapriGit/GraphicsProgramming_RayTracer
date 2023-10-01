@@ -11,6 +11,7 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Scene.h"
+#include "Tests.h"
 
 using namespace dae;
 
@@ -26,6 +27,17 @@ int main(int argc, char* args[])
 	(void)argc;
 	(void)args;
 
+	// Any quick tests to ensure code quality
+	const bool TESTING = false;
+
+	if (TESTING) {
+		int result = Tests::runTests();
+		std::cout << result << std::endl;
+		if (result) {
+			return 1;
+		}
+	}
+
 	//Create window + surfaces
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -33,7 +45,7 @@ int main(int argc, char* args[])
 	const uint32_t height = 480;
 
 	SDL_Window* pWindow = SDL_CreateWindow(
-		"RayTracer - **Insert Name**",
+		"RayTracer - Cesanne Nooy van der Kolff",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height, 0);
