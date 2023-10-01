@@ -12,9 +12,39 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W1
-			assert(false && "No Implemented Yet!");
-			return false;
+			// B = dot(2*dir, (Pr -Ps))
+			float b = Vector3::Dot(2 * ray.direction, ray.origin - sphere.origin);
+
+			// C = |Pr - Ps|^2 - r^2
+			float c = Vector3::Dot(ray.origin - sphere.origin, ray.origin - sphere.origin) - Square(sphere.radius);
+ 			
+			float discriminant = Square(b) - 4 * c;
+			bool hit = discriminant > 0;
+
+			// If discriminant is smaller than 0, there is no hit with the sphere. Return.
+			if (!hit)
+				return false;
+
+			// Find a t greater than 0, to make sure it is in front of the camera. Otherwise, return.
+			float t = -b - sqrt(Square(b) - 4 * c);
+
+			if (t < 0) {
+				t = -b + sqrt(Square(b) - 4 * c);
+				if (t < 0) {
+					return false;
+				}
+			}
+
+			t /= 2;
+
+			// Set the hitRecord if no t smaller was found yet.
+			hitRecord.didHit = true;
+			if (hitRecord.t > t) {
+				hitRecord.t = t;
+				hitRecord.materialIndex = sphere.materialIndex;
+			}
+
+			return true;
 		}
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)

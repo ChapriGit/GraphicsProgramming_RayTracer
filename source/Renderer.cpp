@@ -42,7 +42,7 @@ void Renderer::Render(Scene* pScene) const
 			// cx = (2 (px+0.5) / width - 1) (width/height)
 			// cy = 1 - 2 (py + 0.5) / height
 			float cx = 2 * pcx / m_Width - 1;
-			cx *= (m_Width / m_Height);
+			cx *= (float) m_Width / (float) m_Height;
 			float cy = 1 - (2 * pcy) / m_Height;
 
 			// r = cx right + cy up + look
@@ -52,7 +52,20 @@ void Renderer::Render(Scene* pScene) const
 
 			Ray hitRay{ {0,0,0}, rayDirection };
 
-			ColorRGB finalColor{ rayDirection.x, rayDirection.y, rayDirection.z };
+			// Set up Color to write to buffer
+			ColorRGB finalColor{};
+
+			// HitRecord containing information about a potential hit
+			HitRecord closestHit{};
+
+			// TEMPORARY SPHERE
+			Sphere testSphere{ {0.f, 0.f, 100.f}, 50.f, 0 };
+			GeometryUtils::HitTest_Sphere(testSphere, hitRay, closestHit);
+
+			if (closestHit.didHit) {
+				const float scaled_t = (closestHit.t - 50.f) / 40.f;
+				finalColor = scaled_t * materials[closestHit.materialIndex]->Shade();
+			}
 
 			//Update Color in Buffer
 			finalColor.MaxToOne();
