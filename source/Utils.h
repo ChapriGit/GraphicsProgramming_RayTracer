@@ -8,8 +8,6 @@ namespace dae
 {
 	namespace GeometryUtils
 	{
-		const float MIN_T = 0;
-		const float MAX_T = FLT_MAX;
 
 #pragma region Sphere HitTest
 		//SPHERE HIT-TESTS
@@ -30,21 +28,26 @@ namespace dae
 
 			// Find a t greater than 0, to make sure it is in front of the camera. Otherwise, return.
 			float t = -b - sqrt(Square(b) - 4 * c);
+			t = t / 2;
 
-			if (t < MIN_T || t > MAX_T) {
+			if (t < ray.min || t > ray.max) {
 				t = -b + sqrt(Square(b) - 4 * c);
-				if (t < MIN_T || t > MAX_T) {
+				t = t / 2;
+				if (t < ray.min || t > ray.max) {
 					return false;
 				}
 			}
 
-			t /= 2;
+			if (ignoreHitRecord)
+				return true;
 
 			// Set the hitRecord if no t smaller was found yet.
 			hitRecord.didHit = true;
 			if (hitRecord.t > t) {
 				hitRecord.t = t;
 				hitRecord.materialIndex = sphere.materialIndex;
+				hitRecord.origin = ray.origin + ray.direction * t;
+				hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
 			}
 
 			return true;
@@ -65,12 +68,19 @@ namespace dae
 			float t = Vector3::Dot((plane.origin - ray.origin), plane.normal.Normalized());
 			t = t / Vector3::Dot(ray.direction.Normalized(), plane.normal.Normalized());
 
-			if (t > MIN_T && t < MAX_T && hitRecord.t > t) {
-				hitRecord.didHit = true;
-				hitRecord.t = t;
-				hitRecord.materialIndex = plane.materialIndex;
+			if (t > ray.min && t < ray.max) {
+				if (ignoreHitRecord)
+					return true;
 
-				return true;
+				if (hitRecord.t > t) {
+					hitRecord.didHit = true;
+					hitRecord.t = t;
+					hitRecord.materialIndex = plane.materialIndex;
+					hitRecord.origin = ray.origin + ray.direction * t;
+					hitRecord.normal = plane.normal.Normalized();
+
+					return true;
+				}
 			}
 			
 			return false;
@@ -118,9 +128,7 @@ namespace dae
 		//Direction from target to light
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
-			//todo W3
-			assert(false && "No Implemented Yet!");
-			return {};
+			return light.origin - origin;
 		}
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)

@@ -39,9 +39,36 @@ namespace dae {
 
 	bool Scene::DoesHit(const Ray& ray) const
 	{
-		//todo W3
-		assert(false && "No Implemented Yet!");
+		for (const Sphere& sphere : m_SphereGeometries) {
+			if (GeometryUtils::HitTest_Sphere(sphere, ray))
+				return true;
+		};
+
+		for (const Plane& plane : m_PlaneGeometries) {
+			if (GeometryUtils::HitTest_Plane(plane, ray))
+				return true;
+		}
 		return false;
+	}
+
+	ColorRGB Scene::GetColor(const HitRecord& origin) const
+	{
+		ColorRGB originalColor = m_Materials[origin.materialIndex]->Shade();
+
+		for(const Light& light: m_Lights) {
+			Vector3 originPoint = origin.origin;
+			Vector3 direction = LightUtils::GetDirectionToLight(light, originPoint);
+			Ray lightRay = Ray(originPoint, direction.Normalized());
+			float max = light.type == LightType::Point ? direction.Magnitude() : FLT_MAX;
+			lightRay.max = max;
+			lightRay.min = 0.01f;
+
+			if (DoesHit(lightRay)) {
+				originalColor *= 0.5;
+			}
+		}
+
+		return originalColor;
 	}
 
 #pragma region Scene Helpers
