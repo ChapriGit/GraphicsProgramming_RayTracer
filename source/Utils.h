@@ -8,6 +8,9 @@ namespace dae
 {
 	namespace GeometryUtils
 	{
+		const float MIN_T = 0;
+		const float MAX_T = FLT_MAX;
+
 #pragma region Sphere HitTest
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
@@ -28,9 +31,9 @@ namespace dae
 			// Find a t greater than 0, to make sure it is in front of the camera. Otherwise, return.
 			float t = -b - sqrt(Square(b) - 4 * c);
 
-			if (t < 0) {
+			if (t < MIN_T || t > MAX_T) {
 				t = -b + sqrt(Square(b) - 4 * c);
-				if (t < 0) {
+				if (t < MIN_T || t > MAX_T) {
 					return false;
 				}
 			}
@@ -57,8 +60,19 @@ namespace dae
 		//PLANE HIT-TESTS
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W1
-			assert(false && "No Implemented Yet!");
+			// t = dot((Oplane - Oray), n) / dot(dir, n)
+
+			float t = Vector3::Dot((plane.origin - ray.origin), plane.normal.Normalized());
+			t = t / Vector3::Dot(ray.direction.Normalized(), plane.normal.Normalized());
+
+			if (t > MIN_T && t < MAX_T && hitRecord.t > t) {
+				hitRecord.didHit = true;
+				hitRecord.t = t;
+				hitRecord.materialIndex = plane.materialIndex;
+
+				return true;
+			}
+			
 			return false;
 		}
 

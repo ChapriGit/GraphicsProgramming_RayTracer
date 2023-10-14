@@ -2,6 +2,9 @@
 
 #include <cstdint>
 #include "Vector3.h"
+#include "Camera.h"
+
+#include "Utils.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -33,6 +36,6 @@ namespace dae
 		int m_Width{};
 		int m_Height{};
 
-		Vector3 CalculateRayDirection(int x, int y);
+		Ray CalculateRay(int x, int y, const Camera& camera, const Vector3& origin) const;
 	};
 }

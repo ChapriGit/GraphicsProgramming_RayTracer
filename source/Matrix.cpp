@@ -104,9 +104,7 @@ namespace dae {
 
 	Matrix Matrix::CreateTranslation(float x, float y, float z)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		return { Vector3::UnitX, Vector3::UnitY, Vector3::UnitZ, {x, y, z} };
 	}
 
 	Matrix Matrix::CreateTranslation(const Vector3& t)
@@ -116,30 +114,27 @@ namespace dae {
 
 	Matrix Matrix::CreateRotationX(float pitch)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		// Rotations: 1 0 0  on the axis you're rotating + rotation matrix on the others: cos -sin || sin cos
+		float pitchRad = pitch * PI / 180.f;
+		return { Vector3::UnitX, {0, cos(pitchRad), -sin(pitchRad)}, {0, sin(pitchRad), cos(pitchRad)}, {} };
 	}
 
 	Matrix Matrix::CreateRotationY(float yaw)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		float yawRad = yaw * PI / 180.f;
+		return {{cos(yawRad), 0, -sin(yawRad)}, Vector3::UnitY, {sin(yawRad), 0, cos(yawRad)}, {} };
 	}
 
 	Matrix Matrix::CreateRotationZ(float roll)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		float rollRad = roll * PI / 180.f;
+		return { {cos(rollRad), sin(rollRad), 0}, {-sin(rollRad), cos(rollRad), 0}, Vector3::UnitZ, {} };
 	}
 
 	Matrix Matrix::CreateRotation(const Vector3& r)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		// Roll gets applied first, then yaw, then pitch?
+		return CreateRotationX(r.x) * CreateRotationY(r.y) * CreateRotationZ(r.z);
 	}
 
 	Matrix Matrix::CreateRotation(float pitch, float yaw, float roll)
@@ -149,9 +144,7 @@ namespace dae {
 
 	Matrix Matrix::CreateScale(float sx, float sy, float sz)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		return { {sx, 0, 0}, {0, sy, 0}, {0, 0, sz}, {} };
 	}
 
 	Matrix Matrix::CreateScale(const Vector3& s)

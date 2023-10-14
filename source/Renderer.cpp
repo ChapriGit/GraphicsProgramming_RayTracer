@@ -34,37 +34,17 @@ void Renderer::Render(Scene* pScene) const
 		for (int py{}; py < m_Height; ++py)
 		{
 			// CREATE RAY
-			
-			// Calculate Ray direction
-			float pcx = px + 0.5f;
-			float pcy = py + 0.5f;
-
-			// cx = (2 (px+0.5) / width - 1) (width/height)
-			// cy = 1 - 2 (py + 0.5) / height
-			float cx = 2 * pcx / m_Width - 1;
-			cx *= (float) m_Width / (float) m_Height;
-			float cy = 1 - (2 * pcy) / m_Height;
-
-			// r = cx right + cy up + look
-			// Normalise the result
-			Vector3 rayDirection = camera.forward + cx * camera.right + cy * camera.up;
-			rayDirection.Normalize();
-
-			Ray hitRay{ {0,0,0}, rayDirection };
+			Ray hitRay = CalculateRay(px, py, camera, camera.origin);
 
 			// Set up Color to write to buffer
 			ColorRGB finalColor{};
 
 			// HitRecord containing information about a potential hit
 			HitRecord closestHit{};
-
-			// TEMPORARY SPHERE
-			Sphere testSphere{ {0.f, 0.f, 100.f}, 50.f, 0 };
-			GeometryUtils::HitTest_Sphere(testSphere, hitRay, closestHit);
+			pScene->GetClosestHit(hitRay, closestHit);
 
 			if (closestHit.didHit) {
-				const float scaled_t = (closestHit.t - 50.f) / 40.f;
-				finalColor = scaled_t * materials[closestHit.materialIndex]->Shade();
+				finalColor = materials[closestHit.materialIndex]->Shade();
 			}
 
 			//Update Color in Buffer
@@ -87,7 +67,30 @@ bool Renderer::SaveBufferToImage() const
 	return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
 }
 
-Vector3 Renderer::CalculateRayDirection(int x, int y)
+Ray Renderer::CalculateRay(int x, int y, const Camera& camera, const Vector3& origin) const
 {
-	return Vector3();
+	// Calculate Ray direction
+	float pcx = x + 0.5f;
+	float pcy = y + 0.5f;
+
+	// cx = (2 (px+0.5) / width - 1) (width/height)
+	// cy = 1 - 2 (py + 0.5) / height
+	float cx = 2 * pcx / m_Width - 1;
+	cx *= (float)m_Width / (float)m_Height;
+	float cy = 1 - (2 * pcy) / m_Height;
+
+	float angleRad = camera.fovAngle * PI / 180.f;
+	float fov = tan(angleRad / 2.f);
+	cx *= fov;
+	cy *= fov;
+
+	// r = cx right + cy up + look
+	// Normalise the result
+
+	Matrix cameraTransform = camera.cameraToWorld;
+	Vector3 rayDirection = cameraTransform.TransformVector({cx, cy, 1}).Normalized();
+
+	return Ray(origin, rayDirection);
 }
+
+
