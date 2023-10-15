@@ -44,7 +44,7 @@ void Renderer::Render(Scene* pScene) const
 			pScene->GetClosestHit(hitRay, closestHit);
 
 			if (closestHit.didHit) {
-				finalColor = pScene->GetColor(closestHit);
+				finalColor = pScene->GetColor(&closestHit);
 			}
 
 			//Update Color in Buffer
@@ -93,4 +93,7 @@ Ray Renderer::CalculateRay(int x, int y, const Camera& camera, const Vector3& or
 	return Ray(origin, rayDirection);
 }
 
-
+ColorRGB LightManager::CalculateColor(Scene* pScene, HitRecord* hit)
+{
+	return ColorRGB();
+}

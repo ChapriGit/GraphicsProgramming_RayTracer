@@ -36,7 +36,7 @@ namespace dae
 		Camera& GetCamera() { return m_Camera; }
 		void GetClosestHit(const Ray& ray, HitRecord& closestHit) const;
 		bool DoesHit(const Ray& ray) const;
-		ColorRGB GetColor(const HitRecord& origin) const;
+		ColorRGB GetColor(HitRecord* pHit) const;
 
 		const std::vector<Plane>& GetPlaneGeometries() const { return m_PlaneGeometries; }
 		const std::vector<Sphere>& GetSphereGeometries() const { return m_SphereGeometries; }
@@ -91,6 +91,22 @@ namespace dae
 		Scene_W2(Scene_W2&&) noexcept = delete;
 		Scene_W2& operator=(const Scene_W2&) = delete;
 		Scene_W2& operator=(Scene_W2&&) noexcept = delete;
+
+		void Initialize() override;
+	};
+
+	//+++++++++++++++++++++++++++++++++++++++++
+	//WEEK 3 Test Scene
+	class Scene_W3 final : public Scene
+	{
+	public:
+		Scene_W3() = default;
+		~Scene_W3() override = default;
+
+		Scene_W3(const Scene_W3&) = delete;
+		Scene_W3(Scene_W3&&) noexcept = delete;
+		Scene_W3& operator=(const Scene_W3&) = delete;
+		Scene_W3& operator=(Scene_W3&&) noexcept = delete;
 
 		void Initialize() override;
 	};
