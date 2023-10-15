@@ -140,23 +140,7 @@ namespace dae
 		}
 	};
 #pragma endregion
-#pragma region LIGHT
-	enum class LightType
-	{
-		Point,
-		Directional
-	};
 
-	struct Light
-	{
-		Vector3 origin{};
-		Vector3 direction{};
-		ColorRGB color{};
-		float intensity{};
-
-		LightType type{};
-	};
-#pragma endregion
 #pragma region MISC
 	struct Ray
 	{

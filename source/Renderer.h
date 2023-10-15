@@ -14,15 +14,15 @@ namespace dae
 {
 	class Scene;
 
-	class LightManager {
+	class ColorManager {
 	public:
-		LightManager() = default;
-		~LightManager() = default;
+		ColorManager() = default;
+		~ColorManager() = default;
 
-		LightManager(const LightManager&) = delete;
-		LightManager(LightManager&&) noexcept = delete;
-		LightManager& operator=(const LightManager&) = delete;
-		LightManager& operator=(LightManager&&) noexcept = delete;
+		ColorManager(const ColorManager&) = delete;
+		ColorManager(ColorManager&&) noexcept = delete;
+		ColorManager& operator=(const ColorManager&) = delete;
+		ColorManager& operator=(ColorManager&&) noexcept = delete;
 
 		void CycleLightingMode() {
 			m_currentLightingMode = static_cast<LightingMode>((m_currentLightingMode + 1));
@@ -31,7 +31,7 @@ namespace dae
 		};
 		void ToggleShadows() { m_ShadowsEnabled = !m_ShadowsEnabled; }
 
-		ColorRGB CalculateColor(Scene* pScene, HitRecord* pHit);
+		ColorRGB CalculateColor(Scene* pScene, HitRecord* pHit) const;
 
 	private:
 		enum LightingMode {
@@ -59,7 +59,7 @@ namespace dae
 		void Render(Scene* pScene) const;
 		bool SaveBufferToImage() const;
 
-		LightManager lightManager{};
+		ColorManager m_colorManager{};
 
 	private:
 		SDL_Window* m_pWindow{};

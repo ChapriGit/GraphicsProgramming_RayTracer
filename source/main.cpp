@@ -84,9 +84,9 @@ int main(int argc, char* args[])
 				if(e.key.keysym.scancode == SDL_SCANCODE_X)
 					takeScreenshot = true;
 				if (e.key.keysym.scancode == SDL_SCANCODE_F2)
-					pRenderer->lightManager.ToggleShadows();
+					pRenderer->m_colorManager.ToggleShadows();
 				if (e.key.keysym.scancode == SDL_SCANCODE_F3)
-					pRenderer->lightManager.CycleLightingMode();
+					pRenderer->m_colorManager.CycleLightingMode();
 				break;
 			}
 		}

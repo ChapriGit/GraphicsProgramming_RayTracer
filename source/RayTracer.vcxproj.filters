@@ -56,6 +56,9 @@
     <ClInclude Include="Tests.h">
       <Filter>Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -77,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="Tests.cpp">
       <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

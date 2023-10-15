@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include "Utils.h"
 #include "Material.h"
+#include "Light.h"
 
 namespace dae {
 
@@ -56,12 +57,7 @@ namespace dae {
 		ColorRGB originalColor = m_Materials[pHit->materialIndex]->Shade();
 
 		for(const Light& light: m_Lights) {
-			Vector3 originPoint = pHit->origin;
-			Vector3 direction = LightUtils::GetDirectionToLight(light, originPoint);
-			Ray lightRay = Ray(originPoint, direction.Normalized());
-			float max = light.type == LightType::Point ? direction.Magnitude() : FLT_MAX;
-			lightRay.max = max;
-			lightRay.min = 0.01f;
+			Ray lightRay = light.CreateLightRay(pHit->origin);
 
 			if (DoesHit(lightRay)) {
 				originalColor *= 0.5;

@@ -5,6 +5,7 @@
 #include "Math.h"
 #include "DataTypes.h"
 #include "Camera.h"
+#include "Light.h"
 
 namespace dae
 {
