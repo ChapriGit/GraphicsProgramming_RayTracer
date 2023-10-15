@@ -57,7 +57,7 @@ int main(int argc, char* args[])
 	const auto pTimer = new Timer();
 	const auto pRenderer = new Renderer(pWindow);
 
-	const auto pScene = new Scene_W2();
+	const auto pScene = new Scene_W3();
 	pScene->Initialize();
 
 	//Start loop
@@ -73,6 +73,8 @@ int main(int argc, char* args[])
 	{
 		//--------- Get input events ---------
 		SDL_Event e;
+		int xMouse, yMouse;
+
 		while (SDL_PollEvent(&e))
 		{
 			switch (e.type)
@@ -87,6 +89,11 @@ int main(int argc, char* args[])
 					pRenderer->m_colorManager.ToggleShadows();
 				if (e.key.keysym.scancode == SDL_SCANCODE_F3)
 					pRenderer->m_colorManager.CycleLightingMode();
+				if (e.key.keysym.scancode == SDL_SCANCODE_P) {
+					// Print pixel currently hovered over for debug purposes
+					SDL_GetMouseState(&xMouse, &yMouse);
+					std::cout << xMouse << ", " << yMouse << std::endl;
+				}
 				break;
 			}
 		}

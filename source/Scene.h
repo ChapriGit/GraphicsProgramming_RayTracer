@@ -37,7 +37,11 @@ namespace dae
 		Camera& GetCamera() { return m_Camera; }
 		void GetClosestHit(const Ray& ray, HitRecord& closestHit) const;
 		bool DoesHit(const Ray& ray) const;
-		ColorRGB GetColor(HitRecord* pHit) const;
+
+		ColorRGB GetObservedArea(HitRecord* pHit, bool shadowsEnabled) const;
+		ColorRGB GetRadiance(HitRecord* pHit, bool shadowsEnabled) const;
+		ColorRGB GetBRDF(HitRecord* pHit, bool shadowsEnabled) const;
+		ColorRGB GetColour(HitRecord* pHit, bool shadowsEnabled) const;
 
 		const std::vector<Plane>& GetPlaneGeometries() const { return m_PlaneGeometries; }
 		const std::vector<Sphere>& GetSphereGeometries() const { return m_SphereGeometries; }

@@ -95,17 +95,10 @@ Ray Renderer::CalculateRay(int x, int y, const Camera& camera, const Vector3& or
 
 ColorRGB ColorManager::CalculateColor(Scene* pScene, HitRecord* hit) const
 {
-	switch (m_currentLightingMode) {
-	case (LightingMode::ObservedArea):
-		break;
-	case (LightingMode::Radiance):
-		break;
-	case (LightingMode::BRDF):
-		break;
-	case (LightingMode::Combined):
-		break;
-	}
+	ColorRGB color{};
+
+	color = pScene->GetObservedArea(hit, m_ShadowsEnabled);
+	color.MaxToOne();
 	
-	ColorRGB color = pScene->GetColor(hit);
 	return color;
 }

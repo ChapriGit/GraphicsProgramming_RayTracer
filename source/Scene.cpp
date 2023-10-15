@@ -52,19 +52,22 @@ namespace dae {
 		return false;
 	}
 
-	ColorRGB Scene::GetColor(HitRecord* pHit) const
+	ColorRGB Scene::GetObservedArea(HitRecord* pHit, bool shadowsEnabled) const
 	{
-		ColorRGB originalColor = m_Materials[pHit->materialIndex]->Shade();
+		float cosine = 0;
 
-		for(const Light& light: m_Lights) {
-			Ray lightRay = light.CreateLightRay(pHit->origin);
+		for (const Light& light : m_Lights) {
+			Vector3 lightDir = light.GetDirectionToLight(pHit->origin).Normalized();
+			float area = Vector3::Dot(lightDir, pHit->normal);
+			if (area > 0) {
+				Ray lightRay = light.CreateLightRay(pHit->origin);
 
-			if (DoesHit(lightRay)) {
-				originalColor *= 0.5;
+				if (!DoesHit(lightRay))
+					cosine += area;
 			}
 		}
 
-		return originalColor;
+		return ColorRGB(cosine, cosine, cosine);
 	}
 
 #pragma region Scene Helpers

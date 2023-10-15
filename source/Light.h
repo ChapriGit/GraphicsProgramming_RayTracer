@@ -26,7 +26,7 @@ namespace dae {
 		Vector3 GetDirectionToLight(const Vector3 origin) const;
 		ColorRGB GetRadiance(const Vector3& target) const;
 	};
-	#pragma endregionx
+	#pragma endregion
 
 
 	namespace LightUtils
