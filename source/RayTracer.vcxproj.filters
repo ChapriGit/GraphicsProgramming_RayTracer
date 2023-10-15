@@ -82,7 +82,7 @@
       <Filter>Misc</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
-      <Filter>Math</Filter>
+      <Filter>Misc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

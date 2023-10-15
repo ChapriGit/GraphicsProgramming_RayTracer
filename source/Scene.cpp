@@ -62,7 +62,7 @@ namespace dae {
 			if (area > 0) {
 				Ray lightRay = light.CreateLightRay(pHit->origin);
 
-				if (!DoesHit(lightRay))
+				if (!shadowsEnabled || !DoesHit(lightRay))
 					cosine += area;
 			}
 		}
