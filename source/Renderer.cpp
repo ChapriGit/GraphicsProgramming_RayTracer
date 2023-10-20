@@ -97,7 +97,19 @@ ColorRGB ColorManager::CalculateColor(Scene* pScene, HitRecord* hit) const
 {
 	ColorRGB color{};
 
-	color = pScene->GetRadiance(hit, m_ShadowsEnabled);
+	switch (this->m_currentLightingMode) {
+	case(LightingMode::Radiance):
+		color = pScene->GetRadiance(hit, m_ShadowsEnabled);
+		break;
+
+	case (LightingMode::ObservedArea):
+		color = pScene->GetObservedArea(hit, m_ShadowsEnabled);
+		break;
+
+	case (LightingMode::Combined):
+		color = pScene->GetColour(hit, m_ShadowsEnabled);
+		break;
+	}
 	color.MaxToOne();
 	
 	return color;

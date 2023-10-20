@@ -83,6 +83,27 @@ namespace dae {
 		return color;
 	}
 
+	ColorRGB Scene::GetColour(HitRecord* pHit, bool shadowsEnabled) const
+	{
+		float cosine = 0;
+		ColorRGB color{};
+
+		for (const Light& light : m_Lights) {
+			Vector3 lightDir = light.GetDirectionToLight(pHit->origin).Normalized();
+			float area = Vector3::Dot(lightDir, pHit->normal);
+			if (area > 0) {
+				Ray lightRay = light.CreateLightRay(pHit->origin);
+
+				if (!shadowsEnabled || !DoesHit(lightRay)) {
+					ColorRGB radiance = LightUtils::GetRadiance(light, pHit->origin);
+					color += radiance * area;
+				}
+			}
+		}
+
+		return color;
+	}
+
 #pragma region Scene Helpers
 	Sphere* Scene::AddSphere(const Vector3& origin, float radius, unsigned char materialIndex)
 	{
