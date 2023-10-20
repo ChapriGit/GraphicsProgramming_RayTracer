@@ -20,8 +20,4 @@ namespace dae {
 		return origin - target;
 	}
 
-	ColorRGB Light::GetRadiance(const Vector3& target) const
-	{
-		return ColorRGB();
-	}
 }

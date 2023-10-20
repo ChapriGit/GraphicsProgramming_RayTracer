@@ -34,14 +34,18 @@ namespace dae {
 		//Direction from target to light
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
+			if (light.type == LightType::Directional)
+				return light.direction.Normalized();
 			return light.origin - origin;
 		}
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)
 		{
-			//todo W3
-			assert(false && "No Implemented Yet!");
-			return {};
+			if (light.type == LightType::Directional)
+				return light.intensity * light.color;
+
+			float distance = (light.origin - target).Magnitude();
+			return light.color * light.intensity / (float) (pow(distance, 2));
 		}
 	}
 }

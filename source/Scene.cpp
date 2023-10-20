@@ -70,6 +70,19 @@ namespace dae {
 		return ColorRGB(cosine, cosine, cosine);
 	}
 
+	ColorRGB Scene::GetRadiance(HitRecord* pHit, bool shadowsEnabled) const
+	{
+		ColorRGB color{};
+
+		for (const Light& light : m_Lights) {
+			Ray lightRay = light.CreateLightRay(pHit->origin);
+
+			if (!shadowsEnabled || !DoesHit(lightRay))
+				color += LightUtils::GetRadiance(light, pHit->origin);
+		}
+		return color;
+	}
+
 #pragma region Scene Helpers
 	Sphere* Scene::AddSphere(const Vector3& origin, float radius, unsigned char materialIndex)
 	{
