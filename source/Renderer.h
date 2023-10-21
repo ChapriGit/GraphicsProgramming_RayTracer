@@ -28,10 +28,12 @@ namespace dae
 			m_currentLightingMode = static_cast<LightingMode>((m_currentLightingMode + 1));
 			if (m_currentLightingMode == 4)
 				m_currentLightingMode = ObservedArea;
+			std::cout << "\n \n LIGHTING MODE : " << ToString(m_currentLightingMode) << std::endl;
 		};
+
 		void ToggleShadows() { m_ShadowsEnabled = !m_ShadowsEnabled; }
 
-		ColorRGB CalculateColor(Scene* pScene, HitRecord* pHit) const;
+		ColorRGB CalculateColor(Scene* pScene, HitRecord* pHit, Vector3 viewDir) const;
 
 	private:
 		enum LightingMode {
@@ -43,6 +45,18 @@ namespace dae
 
 		LightingMode m_currentLightingMode{ LightingMode::Combined };
 		bool m_ShadowsEnabled{ true };
+
+		inline const char* ToString(LightingMode lm)
+		{
+			switch (lm)
+			{
+			case ObservedArea:  return "Observed Area";
+			case Radiance:		return "Radiance";
+			case BRDF:			return "BRDF";
+			case Combined:		return "Combined";
+			default:			return "Unknown";
+			}
+		}
 	};
 
 	class Renderer final

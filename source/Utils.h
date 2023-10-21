@@ -19,7 +19,7 @@ namespace dae
 			// C = |Pr - Ps|^2 - r^2
 			float c = Vector3::Dot(ray.origin - sphere.origin, ray.origin - sphere.origin) - Square(sphere.radius);
  			
-			float discriminant = Square(b) - 4 * c;
+			float discriminant = b*b - 4 * c;
 			bool hit = discriminant > 0;
 
 			// If discriminant is smaller than 0, there is no hit with the sphere. Return.
@@ -27,11 +27,11 @@ namespace dae
 				return false;
 
 			// Find a t greater than 0, to make sure it is in front of the camera. Otherwise, return.
-			float t = -b - sqrt(Square(b) - 4 * c);
+			float t = -b - sqrt(b*b - 4 * c);
 			t = t / 2;
 
 			if (t < ray.min || t > ray.max) {
-				t = -b + sqrt(Square(b) - 4 * c);
+				t = -b + sqrt(b*b - 4 * c);
 				t = t / 2;
 				if (t < ray.min || t > ray.max) {
 					return false;
@@ -47,7 +47,7 @@ namespace dae
 				hitRecord.t = t;
 				hitRecord.materialIndex = sphere.materialIndex;
 				hitRecord.origin = ray.origin + ray.direction * t;
-				hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
+				hitRecord.normal = (hitRecord.origin - sphere.origin)/sphere.radius;
 			}
 
 			return true;
@@ -65,8 +65,8 @@ namespace dae
 		{
 			// t = dot((Oplane - Oray), n) / dot(dir, n)
 
-			float t = Vector3::Dot((plane.origin - ray.origin), plane.normal.Normalized());
-			t = t / Vector3::Dot(ray.direction.Normalized(), plane.normal.Normalized());
+			float t = Vector3::Dot((plane.origin - ray.origin), plane.normal);
+			t = t / Vector3::Dot(ray.direction, plane.normal);
 
 			if (t > ray.min && t < ray.max) {
 				if (ignoreHitRecord)

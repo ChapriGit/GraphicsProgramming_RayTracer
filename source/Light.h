@@ -24,7 +24,6 @@ namespace dae {
 
 		Ray CreateLightRay(Vector3 origin) const;
 		Vector3 GetDirectionToLight(const Vector3 origin) const;
-		ColorRGB GetRadiance(const Vector3& target) const;
 	};
 	#pragma endregion
 
@@ -45,7 +44,7 @@ namespace dae {
 				return light.intensity * light.color;
 
 			float distance = (light.origin - target).Magnitude();
-			return light.color * light.intensity / (float) (pow(distance, 2));
+			return light.color * light.intensity / (float) (distance * distance);
 		}
 	}
 }

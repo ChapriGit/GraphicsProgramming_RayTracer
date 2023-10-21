@@ -44,7 +44,7 @@ void Renderer::Render(Scene* pScene) const
 			pScene->GetClosestHit(hitRay, closestHit);
 
 			if (closestHit.didHit) {
-				finalColor = m_colorManager.CalculateColor(pScene, &closestHit);
+				finalColor = m_colorManager.CalculateColor(pScene, &closestHit, hitRay.direction);
 			}
 
 			//Update Color in Buffer
@@ -93,7 +93,7 @@ Ray Renderer::CalculateRay(int x, int y, const Camera& camera, const Vector3& or
 	return Ray(origin, rayDirection);
 }
 
-ColorRGB ColorManager::CalculateColor(Scene* pScene, HitRecord* hit) const
+ColorRGB ColorManager::CalculateColor(Scene* pScene, HitRecord* hit, Vector3 viewDir) const
 {
 	ColorRGB color{};
 
@@ -107,7 +107,11 @@ ColorRGB ColorManager::CalculateColor(Scene* pScene, HitRecord* hit) const
 		break;
 
 	case (LightingMode::Combined):
-		color = pScene->GetColour(hit, m_ShadowsEnabled);
+		color = pScene->GetColour(hit, m_ShadowsEnabled, viewDir);
+		break;
+
+	case (LightingMode::BRDF):
+		color = pScene->GetBRDF(hit, m_ShadowsEnabled, viewDir);
 		break;
 	}
 	color.MaxToOne();
