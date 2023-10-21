@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include "Math.h"
+#include <string>
 
 namespace dae
 {
@@ -32,9 +33,10 @@ namespace dae
 		 */
 		static ColorRGB Phong(float ks, float exp, const Vector3& l, const Vector3& v, const Vector3& n)
 		{
-			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			Vector3 reflectance = Vector3::Reflect(-l, n);
+			float cosine = Vector3::Dot(reflectance, -v);
+			cosine = cosine < 0 ? 0 : cosine;
+			return ks * pow(cosine, exp) * ColorRGB {1, 1, 1};
 		}
 
 		/**

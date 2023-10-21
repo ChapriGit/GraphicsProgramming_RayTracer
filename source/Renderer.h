@@ -28,7 +28,7 @@ namespace dae
 			m_currentLightingMode = static_cast<LightingMode>((m_currentLightingMode + 1));
 			if (m_currentLightingMode == 4)
 				m_currentLightingMode = ObservedArea;
-			std::cout << "\n \n LIGHTING MODE : " << ToString(m_currentLightingMode) << std::endl;
+			std::cout << "\n\nLIGHTING MODE : " << ToString(m_currentLightingMode) << std::endl;
 		};
 
 		void ToggleShadows() { m_ShadowsEnabled = !m_ShadowsEnabled; }

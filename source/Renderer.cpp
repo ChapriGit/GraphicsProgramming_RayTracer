@@ -44,6 +44,9 @@ void Renderer::Render(Scene* pScene) const
 			pScene->GetClosestHit(hitRay, closestHit);
 
 			if (closestHit.didHit) {
+				//if (px == 292 && py == 341) {
+				//	std::cout << "Oi";
+				//}
 				finalColor = m_colorManager.CalculateColor(pScene, &closestHit, hitRay.direction);
 			}
 
