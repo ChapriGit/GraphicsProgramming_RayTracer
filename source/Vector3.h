@@ -21,7 +21,7 @@ namespace dae
 
 		static float Dot(const Vector3& v1, const Vector3& v2);
 		static Vector3 Cross(const Vector3& v1, const Vector3& v2);
-		static float Cos(const Vector3& v1, const Vector3& v2);
+		static Vector3 CreateHalfvector(const Vector3& v1, const Vector3& v2);
 		static Vector3 Project(const Vector3& v1, const Vector3& v2);
 		static Vector3 Reject(const Vector3& v1, const Vector3& v2);
 		static Vector3 Reflect(const Vector3& v1, const Vector3& v2);

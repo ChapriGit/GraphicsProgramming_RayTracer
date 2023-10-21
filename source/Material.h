@@ -106,7 +106,11 @@ namespace dae
 
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
-			return ColorRGB{};
+			Vector3 h = Vector3::CreateHalfvector(l, -v).Normalized();
+			ColorRGB f0 = (m_Metalness == 0) ? ColorRGB{ 0.04f, 0.04f, 0.04f } : m_Albedo;
+
+			return ColorRGB{1, 1, 1} *
+				BRDF::GeometryFunction_Smith(hitRecord.normal, -v, l, m_Roughness);
 		}
 
 	private:

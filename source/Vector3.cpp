@@ -48,10 +48,9 @@ namespace dae {
 		return {v1.x * v2.x + v1.y * v2.y + v1.z * v2.z};
 	}
 
-	float Vector3::Cos(const Vector3& v1, const Vector3& v2)
+	Vector3 Vector3::CreateHalfvector(const Vector3& v1, const Vector3& v2)
 	{
-		float dot = Vector3::Dot(v1, v2);
-		return dot / (float) (v1.Magnitude() * v2.Magnitude());
+		return (v1 + v2) / 2;
 	}
 
 	Vector3 Vector3::Cross(const Vector3& v1, const Vector3& v2)
