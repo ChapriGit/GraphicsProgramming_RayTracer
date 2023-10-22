@@ -109,8 +109,17 @@ namespace dae
 			Vector3 h = Vector3::CreateHalfvector(l, -v).Normalized();
 			ColorRGB f0 = (m_Metalness == 0) ? ColorRGB{ 0.04f, 0.04f, 0.04f } : m_Albedo;
 
-			return ColorRGB{1, 1, 1} *
-				BRDF::GeometryFunction_Smith(hitRecord.normal, -v, l, m_Roughness);
+			ColorRGB fresnel = BRDF::FresnelFunction_Schlick(h, -v, f0);
+			ColorRGB nom =  fresnel *
+				BRDF::GeometryFunction_Smith(hitRecord.normal, -v, l, m_Roughness) *
+				BRDF::NormalDistribution_GGX(hitRecord.normal, h, m_Roughness);
+
+			float denom = 4.f * Vector3::Dot(-v, hitRecord.normal) * Vector3::Dot(l, hitRecord.normal);
+
+			ColorRGB specular = nom / denom;
+			ColorRGB kd = (m_Metalness == 0) ? ColorRGB{ 1, 1, 1 } - fresnel : ColorRGB{};
+
+			return BRDF::Lambert(kd, m_Albedo) + specular;
 		}
 
 	private:
