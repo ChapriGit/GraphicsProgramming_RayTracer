@@ -96,9 +96,86 @@ namespace dae
 		//TRIANGLE HIT-TESTS
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			switch (triangle.cullMode) {
+			case (TriangleCullMode::FrontFaceCulling):
+				if (Vector3::Dot(triangle.normal, -ray.direction) > -0.001)
+					return false;
+				break;
+			case (TriangleCullMode::BackFaceCulling):
+				if (Vector3::Dot(triangle.normal, -ray.direction) < 0.001)
+					return false;
+				break;
+			case (TriangleCullMode::NoCulling):
+				float dotNDir = Vector3::Dot(triangle.normal, -ray.direction);
+				if (dotNDir < 0.001 && dotNDir > -0.001)
+					return false;
+				break;
+			}
+
+			// MÖLLER-TRUMBORE
+			/* Solution of the system [D (v1 - v0) (v2 - v0)] [t u v] = O - v0
+			*			with v0, v1, v2 the corners of the triangle and u, v and w (= 1-u-v) the barycentric coordinates
+			*			of the intersection between the triangle plane and the direction of the ray D with origin O
+			* 
+			*	=> Cramer's rule to find the solution: Ax = b => xi = det(Ai) / det(A)
+			*			Where Ai is the matrix formed by replacing the ith column of A by b
+			* 
+			*			A is a 3x3 matrix
+			* 
+			*			=> b = O - v0
+			*				=>	A1 = [b, (v1 - v0), (v2 - v0)], A2 = [D, b, (v2 - v0)], A3 = [D, (v1 - v0), b]
+			*					t = det(A1)/det(A), u = det(A2)/det(A), v = det(A3)/det(A)
+			* 
+			*	0 < u, v, w < 1 to hit the triangle
+			*/
+
+			Vector3 b = ray.origin - triangle.v0;
+			Vector3 e10 = triangle.v1 - triangle.v0;
+			Vector3 e20 = triangle.v2 - triangle.v0;
+
+			/* Determinant of a 3x3: Pick any row or column:
+			*		Sum(el * cofactor(el))
+			*			=> dx * cof(e10.y e20.y, e10.z e20.z) + dy * cof(e10.x e20.x, e10.z e20.z) 
+			*				+ dz * cof(e10.x e20.x, e10.y e20.y)
+			*		For A1 same thing, but with b instead of d
+			* 
+			*		cof(a b, c d) = a*d - b*c
+			*/
+		
+			Vector3 cofE = Vector3::Cross(e10, e20);
+			float detA = Vector3::Dot(-ray.direction, cofE);
+			
+			float detA1 = Vector3::Dot(b, cofE);
+			float t = (float) detA1 / detA;
+
+			if (t < ray.min || t > ray.max || hitRecord.t < t)
+				return false;
+
+			Vector3 cof_B_E20 = Vector3::Cross(b, e20);
+			float detA2 = Vector3::Dot(-ray.direction, cof_B_E20);
+			float u = (float) detA2 / detA;
+
+			if (u < 0 || u > 1)
+				return false;
+
+			Vector3 cof_E10_B = Vector3::Cross(e10, b);
+			float detA3 = Vector3::Dot(-ray.direction, cof_E10_B);
+			float v = (float)detA3 / detA;
+
+			// u is already between 0 and 1, v has to be below 1, but w also has to be above 0: w = 1 - u - v > 0
+			if (v < 0 || v + u > 1)
+				return false;
+
+			if (ignoreHitRecord)
+				return true;
+
+			hitRecord.t = t;
+			hitRecord.didHit = true;
+			hitRecord.materialIndex = triangle.materialIndex;
+			hitRecord.normal = triangle.normal;
+			hitRecord.origin = ray.origin + t * ray.direction;
+
+			return true;
 		}
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)

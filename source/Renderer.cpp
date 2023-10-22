@@ -41,10 +41,13 @@ void Renderer::Render(Scene* pScene) const
 
 			// HitRecord containing information about a potential hit
 			HitRecord closestHit{};
+			//if (px == 263 && py == 261) {
+			//	std::cout << "Oi";
+			//}
 			pScene->GetClosestHit(hitRay, closestHit);
 
 			if (closestHit.didHit) {
-				//if (px == 274 && py == 369) {
+				//if (px == 263 && py == 261) {
 				//	std::cout << "Oi";
 				//}
 				finalColor = m_colorManager.CalculateColor(pScene, &closestHit, hitRay.direction);
