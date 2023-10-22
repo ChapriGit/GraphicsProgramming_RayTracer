@@ -140,6 +140,8 @@ namespace dae
 			*		For A1 same thing, but with b instead of d
 			* 
 			*		cof(a b, c d) = a*d - b*c
+			* 
+			*		Aka cross and dot product :P
 			*/
 		
 			Vector3 cofE = Vector3::Cross(e10, e20);
@@ -160,7 +162,7 @@ namespace dae
 
 			Vector3 cof_E10_B = Vector3::Cross(e10, b);
 			float detA3 = Vector3::Dot(-ray.direction, cof_E10_B);
-			float v = (float)detA3 / detA;
+			float v = (float) detA3 / detA;
 
 			// u is already between 0 and 1, v has to be below 1, but w also has to be above 0: w = 1 - u - v > 0
 			if (v < 0 || v + u > 1)
