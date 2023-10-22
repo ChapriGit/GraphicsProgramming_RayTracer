@@ -85,6 +85,10 @@ namespace dae
 			float denom = nom * (1 - k);
 			denom += k;
 
+			if (denom < 0.01) {
+				return 0;
+			}
+
 			float result = (float)nom / (float)denom;
 			return result;
 		}
@@ -102,7 +106,7 @@ namespace dae
 			float result = GeometryFunction_SchlickGGX(n, v, roughness) *
 				GeometryFunction_SchlickGGX(n, l, roughness);
 
-			result = result > -0.001 ? result : 0;
+			result = result > 0 ? result : 0;
 			return result;
 		}
 

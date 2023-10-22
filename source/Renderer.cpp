@@ -44,7 +44,7 @@ void Renderer::Render(Scene* pScene) const
 			pScene->GetClosestHit(hitRay, closestHit);
 
 			if (closestHit.didHit) {
-				//if (px == 353 && py == 400) {
+				//if (px == 274 && py == 369) {
 				//	std::cout << "Oi";
 				//}
 				finalColor = m_colorManager.CalculateColor(pScene, &closestHit, hitRay.direction);
@@ -114,7 +114,7 @@ ColorRGB ColorManager::CalculateColor(Scene* pScene, HitRecord* hit, Vector3 vie
 	//	break;
 
 	default:
-		color = pScene->GetBRDF(hit, m_ShadowsEnabled, viewDir);
+		color = pScene->GetBRDF(hit, false, viewDir);
 		break;
 	}
 	color.MaxToOne();
