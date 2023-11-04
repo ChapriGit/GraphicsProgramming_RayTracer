@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include <fstream>
+#include <iostream>
 #include "Math.h"
 #include "DataTypes.h"
 
@@ -189,8 +190,24 @@ namespace dae
 #pragma region TriangeMesh HitTest
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
+			int nrTriangles = (int) mesh.indices.size() / 3;
+			for (int i = 0; i < nrTriangles; i++) {
+				int i0 = mesh.indices[i * 3];
+				int i1 = mesh.indices[i * 3 + 1];
+				int i2 = mesh.indices[i * 3 + 2];
+
+				Vector3 v0 = mesh.transformedPositions[i0];
+				Vector3 v1 = mesh.transformedPositions[i1];
+				Vector3 v2 = mesh.transformedPositions[i2];
+
+				Triangle triangle = Triangle(v0, v1, v2, mesh.transformedNormals[i]);
+				triangle.cullMode = mesh.cullMode;
+				if (GeometryUtils::HitTest_Triangle(triangle, ray, hitRecord, ignoreHitRecord)) {
+					if (ignoreHitRecord)
+						return true;
+					hitRecord.materialIndex = mesh.materialIndex;
+				}
+			}
 			return false;
 		}
 
