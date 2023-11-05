@@ -54,117 +54,6 @@ namespace dae
 		unsigned char materialIndex{};
 	};
 
-	struct TriangleMesh
-	{
-		TriangleMesh() = default;
-		TriangleMesh(const std::vector<Vector3>& _positions, const std::vector<int>& _indices, TriangleCullMode _cullMode):
-		positions(_positions), indices(_indices), cullMode(_cullMode)
-		{
-			//Calculate Normals
-			CalculateNormals();
-
-			//Update Transforms
-			UpdateTransforms();
-		}
-
-		TriangleMesh(const std::vector<Vector3>& _positions, const std::vector<int>& _indices, const std::vector<Vector3>& _normals, TriangleCullMode _cullMode) :
-			positions(_positions), indices(_indices), normals(_normals), cullMode(_cullMode)
-		{
-			UpdateTransforms();
-		}
-
-		std::vector<Vector3> positions{};
-		std::vector<Vector3> normals{};
-		std::vector<int> indices{};
-		unsigned char materialIndex{};
-
-		TriangleCullMode cullMode{TriangleCullMode::BackFaceCulling};
-
-		Matrix rotationTransform{};
-		Matrix translationTransform{};
-		Matrix scaleTransform{};
-
-		std::vector<Vector3> transformedPositions{};
-		std::vector<Vector3> transformedNormals{};
-
-		void Translate(const Vector3& translation)
-		{
-			translationTransform = Matrix::CreateTranslation(translation);
-		}
-
-		void RotateY(float yaw)
-		{
-			rotationTransform = Matrix::CreateRotationY(yaw);
-		}
-
-		void Scale(const Vector3& scale)
-		{
-			scaleTransform = Matrix::CreateScale(scale);
-		}
-
-		void AppendTriangle(const Triangle& triangle, bool ignoreTransformUpdate = false)
-		{
-			int startIndex = static_cast<int>(positions.size());
-
-			positions.push_back(triangle.v0);
-			positions.push_back(triangle.v1);
-			positions.push_back(triangle.v2);
-
-			indices.push_back(startIndex);
-			indices.push_back(++startIndex);
-			indices.push_back(++startIndex);
-
-			normals.push_back(triangle.normal);
-
-			//Not ideal, but making sure all vertices are updated
-			if(!ignoreTransformUpdate)
-				UpdateTransforms();
-		}
-
-		void CalculateNormals()
-		{
-			normals.reserve(positions.size());
-			for (int i = 0; i < indices.size() / 3; i++) {
-				int v0 = indices[i * 3];
-				int v1 = indices[i * 3 + 1];
-				int v2 = indices[i * 3 + 2];
-				Vector3 n1 = Vector3::Cross(positions[v0] - positions[v2], positions[v1] - positions[v0]);
-				Vector3 n2 = Vector3::Cross(positions[v1] - positions[v0], positions[v2] - positions[v1]);
-				Vector3 n3 = Vector3::Cross(positions[v2] - positions[v1], positions[v0] - positions[v2]);
-
-				normals.emplace_back(n1);
-			}
-		}
-
-		void UpdateTransforms()
-		{
-			//Calculate Final Transform 
-			const auto finalTransform = scaleTransform * rotationTransform * translationTransform;
-
-			//Transform Positions (positions > transformedPositions)
-			if (transformedPositions.size() > 1) {
-				transformedPositions.clear();
-			} else {
-				transformedPositions.reserve(positions.size());
-			}
-			for (int i = 0; i < positions.size(); i++) {
-				transformedPositions.emplace_back(finalTransform.TransformPoint(positions[i]));
-			}
-
-
-			//Transform Normals (normals > transformedNormals)
-			if (transformedNormals.size() > 1) {
-				transformedNormals.clear();
-			} else {
-				transformedNormals.reserve(positions.size());
-			}
-			for (int i = 0; i < normals.size(); i++) {
-				transformedNormals.emplace_back(finalTransform.TransformVector(normals[i]));
-			}
-		}
-	};
-#pragma endregion
-
 #pragma region MISC
 	struct Ray
 	{
@@ -173,6 +62,7 @@ namespace dae
 
 		float min{ 0.0001f };
 		float max{ FLT_MAX };
+
 	};
 
 	struct HitRecord

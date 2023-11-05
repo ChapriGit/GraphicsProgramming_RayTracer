@@ -1,7 +1,10 @@
+#define PARALLEL_EXECUTION
+
 //External includes
 #include "SDL.h"
 #include "SDL_surface.h"
 #include <iostream>
+#include <execution>
 
 //Project includes
 #include "Renderer.h"
@@ -25,47 +28,74 @@ Renderer::Renderer(SDL_Window * pWindow) :
 void Renderer::Render(Scene* pScene) const
 {
 	Camera& camera = pScene->GetCamera();
-	auto& materials = pScene->GetMaterials();
-	auto& lights = pScene->GetLights();
+	const Matrix cameraToWorld = camera.CalculateCameraToWorld();
 
-	// For each pixel
-	for (int px{}; px < m_Width; ++px)
-	{
-		for (int py{}; py < m_Height; ++py)
-		{
-			// CREATE RAY
-			Ray hitRay = CalculateRay(px, py, camera, camera.origin);
+	const float aspectRatio = m_Width / static_cast<float>(m_Height);
+	const float fovAngle = camera.fovAngle * TO_RADIANS;
+	const float fov = tan(fovAngle / 2.f);
 
-			// Set up Color to write to buffer
-			ColorRGB finalColor{};
+#if defined (PARALLEL_EXECUTION)
+	//Parallel stuff
+	uint32_t amountOfPixels{ uint32_t(m_Width * m_Height)};
+	std::vector<uint32_t> pixelIndices{};
 
-			// HitRecord containing information about a potential hit
-			HitRecord closestHit{};
-			//if (px == 263 && py == 261) {
-			//	std::cout << "Oi";
-			//}
-			pScene->GetClosestHit(hitRay, closestHit);
+	pixelIndices.reserve(amountOfPixels);
+	for (uint32_t index{}; index < amountOfPixels; ++index)
+		pixelIndices.emplace_back(index);
 
-			if (closestHit.didHit) {
-				//if (px == 263 && py == 261) {
-				//	std::cout << "Oi";
-				//}
-				finalColor = m_colorManager.CalculateColor(pScene, &closestHit, hitRay.direction);
-			}
+	std::for_each(std::execution::par, pixelIndices.begin(), pixelIndices.end(), [&](int i) {
+		RenderPixel(pScene, i, fov, aspectRatio, cameraToWorld, camera.origin);
+		});
 
-			//Update Color in Buffer
-			finalColor.MaxToOne();
-
-			m_pBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBuffer->format,
-				static_cast<uint8_t>(finalColor.r * 255),
-				static_cast<uint8_t>(finalColor.g * 255),
-				static_cast<uint8_t>(finalColor.b * 255));
-		}
+#else
+	// No threads
+	uint32_t amountOfPixels{ uint32_t(m_Width * m_Height) };
+	for (uint32_t pixelIndex{}; pixelIndex < amountOfPixels; pixelIndex++) {
+		RenderPixel(pScene, pixelIndex, fov, aspectRatio, cameraToWorld, camera.origin);
 	}
 
+#endif
 	//@END
 	//Update SDL Surface
 	SDL_UpdateWindowSurface(m_pWindow);
+}
+
+void dae::Renderer::RenderPixel(Scene* pScene, uint32_t pixelIndex, float fov, float aspectRatio, const Matrix cameraToWorld, const Vector3 cameraOrigin) const
+{
+	auto materials{ pScene->GetMaterials()};
+	const uint32_t px{ pixelIndex % m_Width }, py{ pixelIndex / m_Width };
+
+	float rx{ px + 0.5f }, ry{ py + 0.5f };
+	float cx{ (2 * (rx / float(m_Width)) - 1) * aspectRatio * fov };
+	float cy{ (1 - (2 * (ry / float(m_Height)))) * fov };
+
+	Vector3 rayDirection = cameraToWorld.TransformVector({ cx, cy, 1 }).Normalized();
+	Ray hitRay = Ray(cameraOrigin, rayDirection);
+
+	// Set up Color to write to buffer
+	ColorRGB finalColor{};
+
+	// HitRecord containing information about a potential hit
+	HitRecord closestHit{};
+	//if (px == 263 && py == 261) {
+	//	std::cout << "Oi";
+	//}
+	pScene->GetClosestHit(hitRay, closestHit);
+
+	if (closestHit.didHit) {
+		//if (px == 263 && py == 261) {
+		//	std::cout << "Oi";
+		//}
+		finalColor = m_colorManager.CalculateColor(pScene, &closestHit, hitRay.direction);
+	}
+
+	//Update Color in Buffer
+	finalColor.MaxToOne();
+
+	m_pBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBuffer->format,
+		static_cast<uint8_t>(finalColor.r * 255),
+		static_cast<uint8_t>(finalColor.g * 255),
+		static_cast<uint8_t>(finalColor.b * 255));
 }
 
 bool Renderer::SaveBufferToImage() const

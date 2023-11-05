@@ -4,6 +4,7 @@
 
 #include "Math.h"
 #include "DataTypes.h"
+#include "TriangleMesh.h"
 #include "Camera.h"
 #include "Light.h"
 

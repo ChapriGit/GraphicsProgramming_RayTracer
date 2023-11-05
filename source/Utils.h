@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Math.h"
 #include "DataTypes.h"
+#include "TriangleMesh.h"
 
 namespace dae
 {
@@ -188,8 +189,36 @@ namespace dae
 		}
 #pragma endregion
 #pragma region TriangeMesh HitTest
+		inline bool SlabTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray) {
+			float tx1 = (mesh.minAABB.x - ray.origin.x) / ray.direction.x;
+			float tx2 = (mesh.maxAABB.x - ray.origin.x) / ray.direction.x;
+
+			float tmin = std::min(tx1, tx2);
+			float tmax = std::max(tx1, tx2);
+
+			float ty1 = (mesh.minAABB.y - ray.origin.y) / ray.direction.y;
+			float ty2 = (mesh.maxAABB.y - ray.origin.y) / ray.direction.y;
+
+			tmin = std::max(tmin, std::min(ty1, ty2));
+			tmax = std::min(tmax, std::max(ty1, ty2));
+
+			float tz1 = (mesh.minAABB.z - ray.origin.z) / ray.direction.z;
+			float tz2 = (mesh.maxAABB.z - ray.origin.z) / ray.direction.z;
+
+			tmin = std::max(tmin, std::min(tz1, tz2));
+			tmax = std::min(tmax, std::max(tz1, tz2));
+
+			return tmax > 0 && tmax >= tmin;
+		}
+
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
+			if (!SlabTest_TriangleMesh(mesh, ray)) {
+				return false;
+			}
+
+			//Matrix finalTransform = mesh.scaleTransform * mesh.rotationTransform * mesh.translationTransform;
+
 			int nrTriangles = (int) mesh.indices.size() / 3;
 			for (int i = 0; i < nrTriangles; i++) {
 				int i0 = mesh.indices[i * 3];
@@ -208,6 +237,7 @@ namespace dae
 					hitRecord.materialIndex = mesh.materialIndex;
 				}
 			}
+
 			return false;
 		}
 

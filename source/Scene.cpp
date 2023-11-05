@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "Material.h"
 #include "Light.h"
+#include "TriangleMesh.h"
 
 namespace dae {
 
