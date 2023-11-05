@@ -59,7 +59,12 @@
     <ClInclude Include="Light.h">
       <Filter>Misc</Filter>
     </ClInclude>
-    <ClInclude Include="TriangleMesh.h" />
+    <ClInclude Include="Transformation.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="TriangleMesh.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

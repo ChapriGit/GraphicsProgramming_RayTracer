@@ -106,6 +106,7 @@ xcopy "$(SolutionDir)..\lib\vld\x64\Microsoft.DTfW.DHL.manifest" "$(OutDir)" /y 
     <ClInclude Include="Tests.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="Transformation.h" />
     <ClInclude Include="TriangleMesh.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Vector3.h" />
