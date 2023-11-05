@@ -3,7 +3,6 @@
 #include "vector"
 #include "DataTypes.h"
 #include "Transformation.h"
-#include <iostream>
 
 namespace dae
 {
@@ -51,7 +50,7 @@ namespace dae
 
 		Vector3 minAABB{};
 		Vector3 maxAABB{};
-		std::vector<BVHNode*> bvhNode{};
+		std::vector<BVHNode> bvhNode{};
 		std::vector<int> triangles{};
 
 
@@ -137,98 +136,47 @@ namespace dae
 			}
 		}
 
-		bool SlabTest_TriangleMesh(const Ray& ray) const {
-			float tx1 = (minAABB.x - ray.origin.x) / ray.direction.x;
-			float tx2 = (maxAABB.x - ray.origin.x) / ray.direction.x;
-
-			float tmin = std::min(tx1, tx2);
-			float tmax = std::max(tx1, tx2);
-
-			float ty1 = (minAABB.y - ray.origin.y) / ray.direction.y;
-			float ty2 = (maxAABB.y - ray.origin.y) / ray.direction.y;
-
-			tmin = std::max(tmin, std::min(ty1, ty2));
-			tmax = std::min(tmax, std::max(ty1, ty2));
-
-			float tz1 = (minAABB.z - ray.origin.z) / ray.direction.z;
-			float tz2 = (maxAABB.z - ray.origin.z) / ray.direction.z;
-
-			tmin = std::max(tmin, std::min(tz1, tz2));
-			tmax = std::min(tmax, std::max(tz1, tz2));
-
-			return tmax > 0 && tmax >= tmin;
-		}
-
-		bool SlabTest_TriangleMesh(const Ray& ray, const Vector3& min, const Vector3& max) const {
-			float tx1 = (min.x - ray.origin.x) / ray.direction.x;
-			float tx2 = (max.x - ray.origin.x) / ray.direction.x;
-
-			float tmin = std::min(tx1, tx2);
-			float tmax = std::max(tx1, tx2);
-
-			float ty1 = (min.y - ray.origin.y) / ray.direction.y;
-			float ty2 = (max.y - ray.origin.y) / ray.direction.y;
-
-			tmin = std::max(tmin, std::min(ty1, ty2));
-			tmax = std::min(tmax, std::max(ty1, ty2));
-
-			float tz1 = (min.z - ray.origin.z) / ray.direction.z;
-			float tz2 = (max.z - ray.origin.z) / ray.direction.z;
-
-			tmin = std::max(tmin, std::min(tz1, tz2));
-			tmax = std::min(tmax, std::max(tz1, tz2));
-
-			return tmax > 0 && tmax >= tmin;
-		}
-
 		void updateNodeBounds(int idx) {
-			BVHNode* node = bvhNode[idx];
-			Vector3 minValue = Vector3{ FLT_MAX, FLT_MAX, FLT_MAX };
-			Vector3 maxValue = Vector3{ FLT_MIN, FLT_MIN, FLT_MIN };
+			BVHNode& node = bvhNode[idx];
+			node.minAABB = Vector3{ FLT_MAX, FLT_MAX, FLT_MAX };
+			node.maxAABB = Vector3{ FLT_MIN, FLT_MIN, FLT_MIN };
 
-			for (int i = node->firstTriangle; i <= node->lastTriangle; i++) {
-				int triangle = triangles[i];
+			for (int i = node.firstTriangle; i < node.lastTriangle; i++) {
+				int v0 = indices[i * 3];
+				int v1 = indices[i * 3 + 1];
+				int v2 = indices[i * 3 + 2];
 
-				int v0 = indices[triangle];
-				int v1 = indices[triangle + 1];
-				int v2 = indices[triangle + 2];
-
-				minValue = Vector3::Min(minValue, positions[v0]);
-				maxValue = Vector3::Max(maxValue, positions[v0]);
-				minValue = Vector3::Min(minValue, positions[v1]);
-				maxValue = Vector3::Max(maxValue, positions[v1]);
-				minValue = Vector3::Min(minValue, positions[v2]);
-				maxValue = Vector3::Max(maxValue, positions[v2]);
+				minAABB = Vector3::Min(minAABB, positions[v0]);
+				maxAABB = Vector3::Max(maxAABB, positions[v0]);
+				minAABB = Vector3::Min(minAABB, positions[v1]);
+				maxAABB = Vector3::Max(maxAABB, positions[v1]);
+				minAABB = Vector3::Min(minAABB, positions[v2]);
+				maxAABB = Vector3::Max(maxAABB, positions[v2]);
 			}
-
-			node->minAABB = minValue;
-			node->maxAABB = maxValue;
 		}
 
 		void subdivideBVH(int idx) {
-			BVHNode* node = bvhNode[idx];
-			if (node->lastTriangle - node->firstTriangle <= 2) {
-				node->isLeaf = true;
+			BVHNode& node = bvhNode[idx];
+			if (triangles.size() <= 2) {
+				node.isLeaf = true;
 				return;
 			}
 
 			// Find axis to split. Currently going for SMS - Longest Axis
-			Vector3 extent = node->maxAABB - node->minAABB;
+			Vector3 extent = node.maxAABB - node.minAABB;
 			int axis = extent.y > extent.x ? 1 : 0;
 			axis = extent.z > extent.y ? 2 : axis;
 
-			float split = node->minAABB[axis] + extent[axis] * 0.5f;
+			float split = node.minAABB[axis] + extent[axis] * 0.5f;
 
-			int i = node->firstTriangle;
-			int j = node->lastTriangle;
+			int i = node.firstTriangle;
+			int j = node.lastTriangle;
 
 			// Half sorting algorithm
 			while (i <= j) {
-				int triangle = triangles[i];
-
-				int v0 = indices[triangle];
-				int v1 = indices[triangle + 1];
-				int v2 = indices[triangle + 2];
+				int v0 = indices[i * 3];
+				int v1 = indices[i * 3 + 1];
+				int v2 = indices[i * 3 + 2];
 
 				Vector3 centre = (positions[v0] + positions[v1] + positions[v2]) * 0.333f;
 				if (centre[axis] < split)
@@ -242,41 +190,40 @@ namespace dae
 			}
 
 			// If everything on one side, stop split
-			int leftCount = i - node->firstTriangle;
-			if (leftCount == 0 || j == node->lastTriangle) {
-				node->isLeaf = true;
+			int leftCount = i - node.firstTriangle;
+			if (leftCount == 0 || leftCount == node.lastTriangle - node.firstTriangle) {
+				node.isLeaf = true;
 				return;
 			}
 
 			int nextNode = (int) bvhNode.size();
-			bvhNode.push_back(new BVHNode{});
-			bvhNode.push_back(new BVHNode{});
+			BVHNode leftChild = BVHNode{};
+			BVHNode rightChild = BVHNode{};
+			bvhNode.emplace_back(leftChild);
+			bvhNode.emplace_back(rightChild);
 
-			BVHNode* leftChild = bvhNode[nextNode];
-			BVHNode* rightChild = bvhNode[nextNode + 1];
-
-			node->leftChild = nextNode;
-			leftChild->firstTriangle = node->firstTriangle;
-			leftChild->lastTriangle = j;
+			node.leftChild = nextNode;
+			leftChild.firstTriangle = node.firstTriangle;
+			leftChild.lastTriangle = j;
 			updateNodeBounds(nextNode);
 			subdivideBVH(nextNode);
 
-			rightChild->firstTriangle = i;
-			rightChild->lastTriangle = node->lastTriangle;
+			leftChild.firstTriangle = i;
+			leftChild.lastTriangle = node.lastTriangle;
 			updateNodeBounds(nextNode + 1);
 			subdivideBVH(nextNode + 1);
 
 		}
 
 		void createBVH() {
-			int nrTriangles = (int)indices.size() / 3;
+			int nrTriangles = (int)positions.size() / 3;
 			bvhNode.reserve(nrTriangles * 2 - 1);
-			bvhNode.push_back(new BVHNode{});
+			bvhNode.emplace_back(BVHNode{});
 
-			BVHNode& root = *bvhNode[0];
+			BVHNode& root = bvhNode[0];
 			root.leftChild = 0;
 			root.firstTriangle = 0;
-			root.lastTriangle = std::max(nrTriangles - 1, 1);
+			root.lastTriangle = nrTriangles - 1;
 
 			triangles.reserve(nrTriangles);
 			for (int i = 0; i < nrTriangles; i++)
@@ -284,35 +231,6 @@ namespace dae
 
 			updateNodeBounds(0);
 			subdivideBVH(0);
-		}
-
-		std::vector<int> traverseTree(int idx, const Ray& ray) const {
-			const BVHNode& node = *bvhNode[idx];
-			std::vector<int> hit;
-			hit.reserve(node.lastTriangle - node.firstTriangle);
-
-			if (node.isLeaf) {
-				for (int i = node.firstTriangle; i <= node.lastTriangle; i++) {
-					hit.push_back(triangles[i]);
-				}
-
-				return hit;
-			}
-
-			const BVHNode* leftChild = bvhNode[node.leftChild];
-			const BVHNode* rightChild = bvhNode[node.leftChild + 1];
-
-			if (SlabTest_TriangleMesh(ray, leftChild->minAABB, leftChild->maxAABB)) {
-				std::vector<int> leftHit = traverseTree(node.leftChild, ray);
-				hit.insert(hit.end(), std::begin(leftHit), std::end(leftHit));
-			}
-
-			if (SlabTest_TriangleMesh(ray, rightChild->minAABB, rightChild->maxAABB)) {
-				std::vector<int> rightHit = traverseTree(node.leftChild+1, ray);
-				hit.insert(hit.end(), std::begin(rightHit), std::end(rightHit));
-			}
-
-			return hit;
 		}
 	};
 }

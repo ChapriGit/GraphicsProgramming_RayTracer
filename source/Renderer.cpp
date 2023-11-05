@@ -1,4 +1,4 @@
-//#define PARALLEL_EXECUTION
+#define PARALLEL_EXECUTION
 
 //External includes
 #include "SDL.h"
