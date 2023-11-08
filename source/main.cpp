@@ -11,7 +11,6 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Scene.h"
-#include "Tests.h"
 
 using namespace dae;
 
@@ -26,17 +25,6 @@ int main(int argc, char* args[])
 	//Unreferenced parameters
 	(void)argc;
 	(void)args;
-
-	// Any quick tests to ensure code quality
-	const bool TESTING = false;
-
-	if (TESTING) {
-		int result = Tests::runTests();
-		std::cout << result << std::endl;
-		if (result) {
-			return 1;
-		}
-	}
 
 	//Create window + surfaces
 	SDL_Init(SDL_INIT_VIDEO);
@@ -57,7 +45,7 @@ int main(int argc, char* args[])
 	const auto pTimer = new Timer();
 	const auto pRenderer = new Renderer(pWindow);
 
-	const auto pScene = new Scene_W4_ReferenceScene;
+	const auto pScene = new Scene_W4_BunnyScene;
 	pScene->Initialize();
 
 	//Start loop

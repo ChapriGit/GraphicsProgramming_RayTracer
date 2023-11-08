@@ -53,14 +53,8 @@
     <ClInclude Include="DataTypes.h">
       <Filter>Misc</Filter>
     </ClInclude>
-    <ClInclude Include="Tests.h">
-      <Filter>Misc</Filter>
-    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Misc</Filter>
-    </ClInclude>
-    <ClInclude Include="Transformation.h">
-      <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="TriangleMesh.h">
       <Filter>Misc</Filter>
@@ -82,9 +76,6 @@
       <Filter>Misc</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
-      <Filter>Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests.cpp">
       <Filter>Misc</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">

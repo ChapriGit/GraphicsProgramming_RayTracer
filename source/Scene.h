@@ -39,10 +39,10 @@ namespace dae
 		void GetClosestHit(const Ray& ray, HitRecord& closestHit) const;
 		bool DoesHit(const Ray& ray) const;
 
-		ColorRGB GetObservedArea(HitRecord* pHit, bool shadowsEnabled) const;
-		ColorRGB GetRadiance(HitRecord* pHit, bool shadowsEnabled) const;
-		ColorRGB GetBRDF(HitRecord* pHit, bool shadowsEnabled, Vector3 viewDir) const;
-		ColorRGB GetColour(HitRecord* pHit, bool shadowsEnabled, Vector3 viewDir) const;
+		ColorRGB GetObservedArea(const HitRecord* pHit, bool shadowsEnabled) const;
+		ColorRGB GetRadiance(const HitRecord* pHit, bool shadowsEnabled) const;
+		ColorRGB GetBRDF(const HitRecord* pHit, bool shadowsEnabled, const Vector3& viewDir) const;
+		ColorRGB GetColour(const HitRecord* pHit, bool shadowsEnabled, const Vector3& viewDir) const;
 
 		const std::vector<Plane>& GetPlaneGeometries() const { return m_PlaneGeometries; }
 		const std::vector<Sphere>& GetSphereGeometries() const { return m_SphereGeometries; }

@@ -70,6 +70,7 @@ namespace dae
 			float t = Vector3::Dot((plane.origin - ray.origin), plane.normal);
 			t = t / Vector3::Dot(ray.direction, plane.normal);
 
+			// Set the hitrecord if a new closest hit was found.
 			if (t > ray.min && t < ray.max) {
 				if (ignoreHitRecord)
 					return true;
@@ -98,6 +99,7 @@ namespace dae
 		//TRIANGLE HIT-TESTS
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
+			// Check what way the triangle is facing and if the ray is coming from the right direction.
 			switch (triangle.cullMode) {
 			case (TriangleCullMode::FrontFaceCulling):
 				if (Vector3::Dot(triangle.normal, -ray.direction) > -0.001)
@@ -152,9 +154,11 @@ namespace dae
 			float detA1 = Vector3::Dot(b, cofE);
 			float t = (float) detA1 / detA;
 
+			// If the ray does not hit the plane or already has a hit closer, return.
 			if (t < ray.min || t > ray.max || hitRecord.t < t)
 				return false;
 
+			// Check whether the ray hits within the triangle.
 			Vector3 cof_B_E20 = Vector3::Cross(b, e20);
 			float detA2 = Vector3::Dot(-ray.direction, cof_B_E20);
 			float u = (float) detA2 / detA;
@@ -173,6 +177,7 @@ namespace dae
 			if (ignoreHitRecord)
 				return true;
 
+			// Fill in the hitrecord if a hit was found.
 			hitRecord.t = t;
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = triangle.materialIndex;
@@ -190,6 +195,7 @@ namespace dae
 #pragma endregion
 #pragma region TriangeMesh HitTest
 		inline bool SlabTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray) {
+			// Quick test to see whether a ray hits a Axis Aligned Bounding Box.
 			float tx1 = (mesh.minAABB.x - ray.origin.x) / ray.direction.x;
 			float tx2 = (mesh.maxAABB.x - ray.origin.x) / ray.direction.x;
 
@@ -217,18 +223,20 @@ namespace dae
 				return false;
 			}
 
-			//Matrix finalTransform = mesh.scaleTransform * mesh.rotationTransform * mesh.translationTransform;
-
+			// If it hit the bounding box, loop to see whether it hits any triangles.
 			int nrTriangles = (int) mesh.indices.size() / 3;
 			for (int i = 0; i < nrTriangles; i++) {
+				// Find the indices of the triangle
 				int i0 = mesh.indices[i * 3];
 				int i1 = mesh.indices[i * 3 + 1];
 				int i2 = mesh.indices[i * 3 + 2];
 
+				// Retrieve the transformed positions of the mesh
 				Vector3 v0 = mesh.transformedPositions[i0];
 				Vector3 v1 = mesh.transformedPositions[i1];
 				Vector3 v2 = mesh.transformedPositions[i2];
 
+				// Test the triangle
 				Triangle triangle = Triangle(v0, v1, v2, mesh.transformedNormals[i]);
 				triangle.cullMode = mesh.cullMode;
 				if (GeometryUtils::HitTest_Triangle(triangle, ray, hitRecord, ignoreHitRecord)) {

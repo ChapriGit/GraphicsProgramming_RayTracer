@@ -109,6 +109,9 @@ namespace dae
 			Vector3 h = Vector3::CreateHalfvector(l, -v).Normalized();
 			ColorRGB f0 = (m_Metalness == 0) ? ColorRGB{ 0.04f, 0.04f, 0.04f } : m_Albedo;
 
+			// Colour = NFG / 4(v*n)(l*n)
+			// Normal - Fresnel - Geometry, denominator reprojects factors.
+
 			ColorRGB fresnel = BRDF::FresnelFunction_Schlick(h, -v, f0);
 			ColorRGB nom =  fresnel *
 				BRDF::GeometryFunction_Smith(hitRecord.normal, -v, l, m_Roughness) *

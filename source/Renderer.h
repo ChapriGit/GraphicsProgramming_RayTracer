@@ -33,7 +33,7 @@ namespace dae
 
 		void ToggleShadows() { m_ShadowsEnabled = !m_ShadowsEnabled; }
 
-		ColorRGB CalculateColor(Scene* pScene, HitRecord* pHit, Vector3 viewDir) const;
+		ColorRGB CalculateColor(Scene* pScene, HitRecord* pHit, const Vector3& viewDir) const;
 
 	private:
 		enum LightingMode {
@@ -85,6 +85,5 @@ namespace dae
 		int m_Width{};
 		int m_Height{};
 
-		Ray CalculateRay(int x, int y, const Camera& camera, const Vector3& origin) const;
 	};
 }

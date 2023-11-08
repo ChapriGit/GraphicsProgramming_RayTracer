@@ -29,6 +29,7 @@ namespace dae {
 		m_Materials.clear();
 	}
 
+	// Find the closest hit within the scene for a given ray. The solution will be saved in the hitrecord if any hit was found.
 	void Scene::GetClosestHit(const Ray& ray, HitRecord& closestHit) const
 	{
 		for (const Sphere& sphere : m_SphereGeometries) {
@@ -47,6 +48,7 @@ namespace dae {
 		}
 	}
 
+	// Find whether or not the ray hits anything in the scene.
 	bool Scene::DoesHit(const Ray& ray) const
 	{
 		for (const Sphere& sphere : m_SphereGeometries) {
@@ -71,7 +73,8 @@ namespace dae {
 		return false;
 	}
 
-	ColorRGB Scene::GetObservedArea(HitRecord* pHit, bool shadowsEnabled) const
+	// Calculates the relative amount of light hitting a point, given by a hit record. Cosine area rule.
+	ColorRGB Scene::GetObservedArea(const HitRecord* pHit, bool shadowsEnabled) const
 	{
 		float cosine = 0;
 
@@ -89,7 +92,8 @@ namespace dae {
 		return ColorRGB(cosine, cosine, cosine);
 	}
 
-	ColorRGB Scene::GetRadiance(HitRecord* pHit, bool shadowsEnabled) const
+	// Calculates the radiance hitting a point, given by a hit record.
+	ColorRGB Scene::GetRadiance(const HitRecord* pHit, bool shadowsEnabled) const
 	{
 		ColorRGB color{};
 
@@ -102,7 +106,8 @@ namespace dae {
 		return color;
 	}
 
-	ColorRGB Scene::GetBRDF(HitRecord* pHit, bool shadowsEnabled, Vector3 viewDir) const
+	// Calculates the BRDF ina given point. 
+	ColorRGB Scene::GetBRDF(const HitRecord* pHit, bool shadowsEnabled, const Vector3& viewDir) const
 	{
 		ColorRGB color{};
 
@@ -116,7 +121,7 @@ namespace dae {
 		return color;
 	}
 
-	ColorRGB Scene::GetColour(HitRecord* pHit, bool shadowsEnabled, Vector3 viewDir) const
+	ColorRGB Scene::GetColour(const HitRecord* pHit, bool shadowsEnabled, const Vector3& viewDir) const
 	{
 		float cosine = 0;
 		ColorRGB color{};

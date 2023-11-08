@@ -6,15 +6,6 @@
 
 namespace dae
 {
-	struct BVHNode {
-		Vector3 minAABB;
-		Vector3 maxAABB;
-
-		int leftChild;
-		bool isLeaf;
-		int firstTriangle, lastTriangle;
-	};
-
 	struct TriangleMesh
 	{
 		TriangleMesh() = default;
@@ -50,8 +41,6 @@ namespace dae
 
 		Vector3 minAABB{};
 		Vector3 maxAABB{};
-		std::vector<BVHNode> bvhNode{};
-		std::vector<int> triangles{};
 
 
 		void Translate(const Vector3& translation)
@@ -91,15 +80,22 @@ namespace dae
 		void CalculateNormals()
 		{
 			normals.reserve(positions.size());
+
+			// Loop over all triangles
 			for (int i = 0; i < indices.size() / 3; i++) {
+				// Get the indices of all the vertices of the triangles
 				int v0 = indices[i * 3];
 				int v1 = indices[i * 3 + 1];
 				int v2 = indices[i * 3 + 2];
+
+				// Calculate normal for all points.
 				Vector3 n1 = Vector3::Cross(positions[v0] - positions[v2], positions[v1] - positions[v0]);
 				Vector3 n2 = Vector3::Cross(positions[v1] - positions[v0], positions[v2] - positions[v1]);
 				Vector3 n3 = Vector3::Cross(positions[v2] - positions[v1], positions[v0] - positions[v2]);
 
-				normals.emplace_back(n1);
+				Vector3 n = (n1 + n2 + n3) / 3;
+
+				normals.emplace_back(n);
 			}
 		}
 
@@ -134,103 +130,6 @@ namespace dae
 			for (int i = 0; i < normals.size(); i++) {
 				transformedNormals.emplace_back(finalTransform.transformVector(normals[i]));
 			}
-		}
-
-		void updateNodeBounds(int idx) {
-			BVHNode& node = bvhNode[idx];
-			node.minAABB = Vector3{ FLT_MAX, FLT_MAX, FLT_MAX };
-			node.maxAABB = Vector3{ FLT_MIN, FLT_MIN, FLT_MIN };
-
-			for (int i = node.firstTriangle; i < node.lastTriangle; i++) {
-				int v0 = indices[i * 3];
-				int v1 = indices[i * 3 + 1];
-				int v2 = indices[i * 3 + 2];
-
-				minAABB = Vector3::Min(minAABB, positions[v0]);
-				maxAABB = Vector3::Max(maxAABB, positions[v0]);
-				minAABB = Vector3::Min(minAABB, positions[v1]);
-				maxAABB = Vector3::Max(maxAABB, positions[v1]);
-				minAABB = Vector3::Min(minAABB, positions[v2]);
-				maxAABB = Vector3::Max(maxAABB, positions[v2]);
-			}
-		}
-
-		void subdivideBVH(int idx) {
-			BVHNode& node = bvhNode[idx];
-			if (triangles.size() <= 2) {
-				node.isLeaf = true;
-				return;
-			}
-
-			// Find axis to split. Currently going for SMS - Longest Axis
-			Vector3 extent = node.maxAABB - node.minAABB;
-			int axis = extent.y > extent.x ? 1 : 0;
-			axis = extent.z > extent.y ? 2 : axis;
-
-			float split = node.minAABB[axis] + extent[axis] * 0.5f;
-
-			int i = node.firstTriangle;
-			int j = node.lastTriangle;
-
-			// Half sorting algorithm
-			while (i <= j) {
-				int v0 = indices[i * 3];
-				int v1 = indices[i * 3 + 1];
-				int v2 = indices[i * 3 + 2];
-
-				Vector3 centre = (positions[v0] + positions[v1] + positions[v2]) * 0.333f;
-				if (centre[axis] < split)
-					i++;
-				else {
-					int tmp = triangles[i];
-					triangles[i] = triangles[j];
-					triangles[j] = tmp;
-					j--;
-				}
-			}
-
-			// If everything on one side, stop split
-			int leftCount = i - node.firstTriangle;
-			if (leftCount == 0 || leftCount == node.lastTriangle - node.firstTriangle) {
-				node.isLeaf = true;
-				return;
-			}
-
-			int nextNode = (int) bvhNode.size();
-			BVHNode leftChild = BVHNode{};
-			BVHNode rightChild = BVHNode{};
-			bvhNode.emplace_back(leftChild);
-			bvhNode.emplace_back(rightChild);
-
-			node.leftChild = nextNode;
-			leftChild.firstTriangle = node.firstTriangle;
-			leftChild.lastTriangle = j;
-			updateNodeBounds(nextNode);
-			subdivideBVH(nextNode);
-
-			leftChild.firstTriangle = i;
-			leftChild.lastTriangle = node.lastTriangle;
-			updateNodeBounds(nextNode + 1);
-			subdivideBVH(nextNode + 1);
-
-		}
-
-		void createBVH() {
-			int nrTriangles = (int)positions.size() / 3;
-			bvhNode.reserve(nrTriangles * 2 - 1);
-			bvhNode.emplace_back(BVHNode{});
-
-			BVHNode& root = bvhNode[0];
-			root.leftChild = 0;
-			root.firstTriangle = 0;
-			root.lastTriangle = nrTriangles - 1;
-
-			triangles.reserve(nrTriangles);
-			for (int i = 0; i < nrTriangles; i++)
-				triangles.push_back(i * 3);
-
-			updateNodeBounds(0);
-			subdivideBVH(0);
 		}
 	};
 }

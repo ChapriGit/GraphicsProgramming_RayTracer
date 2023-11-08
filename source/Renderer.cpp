@@ -39,16 +39,18 @@ void Renderer::Render(Scene* pScene) const
 	uint32_t amountOfPixels{ uint32_t(m_Width * m_Height)};
 	std::vector<uint32_t> pixelIndices{};
 
+	// Reserve a colour buffer
 	pixelIndices.reserve(amountOfPixels);
 	for (uint32_t index{}; index < amountOfPixels; ++index)
 		pixelIndices.emplace_back(index);
 
+	// Each pixel can de rendered in parallel
 	std::for_each(std::execution::par, pixelIndices.begin(), pixelIndices.end(), [&](int i) {
 		RenderPixel(pScene, i, fov, aspectRatio, cameraToWorld, camera.origin);
 		});
 
 #else
-	// No threads
+	// If no threads
 	uint32_t amountOfPixels{ uint32_t(m_Width * m_Height) };
 	for (uint32_t pixelIndex{}; pixelIndex < amountOfPixels; pixelIndex++) {
 		RenderPixel(pScene, pixelIndex, fov, aspectRatio, cameraToWorld, camera.origin);
@@ -65,10 +67,12 @@ void dae::Renderer::RenderPixel(Scene* pScene, uint32_t pixelIndex, float fov, f
 	auto materials{ pScene->GetMaterials()};
 	const uint32_t px{ pixelIndex % m_Width }, py{ pixelIndex / m_Width };
 
+	// Find the pixel in camera space
 	float rx{ px + 0.5f }, ry{ py + 0.5f };
 	float cx{ (2 * (rx / float(m_Width)) - 1) * aspectRatio * fov };
 	float cy{ (1 - (2 * (ry / float(m_Height)))) * fov };
 
+	// Create a ray for the pixel
 	Vector3 rayDirection = cameraToWorld.TransformVector({ cx, cy, 1 }).Normalized();
 	Ray hitRay = Ray(cameraOrigin, rayDirection);
 
@@ -77,15 +81,9 @@ void dae::Renderer::RenderPixel(Scene* pScene, uint32_t pixelIndex, float fov, f
 
 	// HitRecord containing information about a potential hit
 	HitRecord closestHit{};
-	//if (px == 263 && py == 261) {
-	//	std::cout << "Oi";
-	//}
 	pScene->GetClosestHit(hitRay, closestHit);
 
 	if (closestHit.didHit) {
-		//if (px == 263 && py == 261) {
-		//	std::cout << "Oi";
-		//}
 		finalColor = m_colorManager.CalculateColor(pScene, &closestHit, hitRay.direction);
 	}
 
@@ -103,33 +101,7 @@ bool Renderer::SaveBufferToImage() const
 	return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
 }
 
-Ray Renderer::CalculateRay(int x, int y, const Camera& camera, const Vector3& origin) const
-{
-	// Calculate Ray direction
-	float pcx = x + 0.5f;
-	float pcy = y + 0.5f;
-
-	// cx = (2 (px+0.5) / width - 1) (width/height)
-	// cy = 1 - 2 (py + 0.5) / height
-	float cx = 2 * pcx / m_Width - 1;
-	cx *= (float)m_Width / (float)m_Height;
-	float cy = 1 - (2 * pcy) / m_Height;
-
-	float angleRad = camera.fovAngle * PI / 180.f;
-	float fov = tan(angleRad / 2.f);
-	cx *= fov;
-	cy *= fov;
-
-	// r = cx right + cy up + look
-	// Normalise the result
-
-	Matrix cameraTransform = camera.cameraToWorld;
-	Vector3 rayDirection = cameraTransform.TransformVector({cx, cy, 1}).Normalized();
-
-	return Ray(origin, rayDirection);
-}
-
-ColorRGB ColorManager::CalculateColor(Scene* pScene, HitRecord* hit, Vector3 viewDir) const
+ColorRGB ColorManager::CalculateColor(Scene* pScene, HitRecord* hit, const Vector3& viewDir) const
 {
 	ColorRGB color{};
 
