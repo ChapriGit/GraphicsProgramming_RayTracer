@@ -149,10 +149,10 @@ namespace dae
 			*/
 		
 			Vector3 cofE = Vector3::Cross(e10, e20);
-			float detA = Vector3::Dot(-ray.direction, cofE);
+			float invDetA = 1.f / Vector3::Dot(-ray.direction, cofE);
 			
 			float detA1 = Vector3::Dot(b, cofE);
-			float t = (float) detA1 / detA;
+			float t = (float) detA1 * invDetA;
 
 			// If the ray does not hit the plane or already has a hit closer, return.
 			if (t < ray.min || t > ray.max || hitRecord.t < t)
@@ -161,14 +161,14 @@ namespace dae
 			// Check whether the ray hits within the triangle.
 			Vector3 cof_B_E20 = Vector3::Cross(b, e20);
 			float detA2 = Vector3::Dot(-ray.direction, cof_B_E20);
-			float u = (float) detA2 / detA;
+			float u = (float) detA2 * invDetA;
 
 			if (u < 0 || u > 1)
 				return false;
 
 			Vector3 cof_E10_B = Vector3::Cross(e10, b);
 			float detA3 = Vector3::Dot(-ray.direction, cof_E10_B);
-			float v = (float) detA3 / detA;
+			float v = (float) detA3 * invDetA;
 
 			// u is already between 0 and 1, v has to be below 1, but w also has to be above 0: w = 1 - u - v > 0
 			if (v < 0 || v + u > 1)

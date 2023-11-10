@@ -60,18 +60,24 @@ namespace dae
 
 			// Transform Rotation:
 			bool rotated = false;
-			if ((mouseState & SDL_BUTTON(SDL_BUTTON_LEFT) || mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) && abs(mouseX) > 1) {
-				float rotationDist = mouseX > 0 ? SDL_clamp(mouseX/800.f, -3, -1) : SDL_clamp(mouseX / 800.f, 1, 3);
-				totalYaw -= rotationDist * ROTATION_SPEED;
-				totalYaw = fmod(totalYaw, 360.f);
-				rotated = true;
+			Vector3 movementDirection = {};
+			if ((mouseState & SDL_BUTTON(SDL_BUTTON_LEFT) && mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) && abs(mouseY) > 1) {
+				movementDirection += mouseY > 0 ? up : -up;
 			}
+			else {
+				if ((mouseState & SDL_BUTTON(SDL_BUTTON_LEFT) || mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) && abs(mouseX) > 1) {
+					float rotationDist = mouseX > 0 ? SDL_clamp(mouseX / 800.f, -3, -1) : SDL_clamp(mouseX / 800.f, 1, 3);
+					totalYaw -= rotationDist * ROTATION_SPEED;
+					totalYaw = fmod(totalYaw, 360.f);
+					rotated = true;
+				}
 
-			if ((mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) && abs(mouseY) > 1) {
-				float rotationDist = mouseY > 0 ? SDL_clamp(mouseY/800.f, -3, -1) : SDL_clamp(mouseY / 800.f, 1, 3);
-				totalPitch += rotationDist * ROTATION_SPEED;
-				totalPitch = fmod(totalPitch, 360.f);
-				rotated = true;
+				if ((mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) && abs(mouseY) > 1) {
+					float rotationDist = mouseY > 0 ? SDL_clamp(mouseY / 800.f, -3, -1) : SDL_clamp(mouseY / 800.f, 1, 3);
+					totalPitch += rotationDist * ROTATION_SPEED;
+					totalPitch = fmod(totalPitch, 360.f);
+					rotated = true;
+				}
 			}
 
 			if (rotated) {
@@ -84,8 +90,6 @@ namespace dae
 
 
 			// Transform Position
-			Vector3 movementDirection = {};
-
 			if (pKeyboardState[SDL_SCANCODE_W] == 1)
 				movementDirection = forward;
 			if (pKeyboardState[SDL_SCANCODE_A] == 1)
@@ -98,7 +102,6 @@ namespace dae
 				movementDirection -= up;
 			if (pKeyboardState[SDL_SCANCODE_E] == 1)
 				movementDirection += up;
-
 
 			if (movementDirection.Magnitude() > 0.001) {
 				movementDirection.Normalize();
