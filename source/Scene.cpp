@@ -465,14 +465,13 @@ namespace dae {
 		//OBJ
 		//===
 		pMesh = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
-		Utils::ParseOBJ("Resources/lowpoly_bunny.obj",
+		Utils::ParseOBJ("Resources/lowpoly_bunny2.obj",
 			//Utils::ParseOBJ("Resources/simple_object.obj",
 			pMesh->positions,
 			pMesh->normals,
 			pMesh->indices);
 
 		//No need to Calculate the normals, these are calculated inside the ParseOBJ function
-		pMesh->RotateY(180);
 		pMesh->UpdateTransforms();
 
 
